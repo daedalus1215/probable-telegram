@@ -1,26 +1,17 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersService } from './domain/users.service';
 import { UsersController } from './app/controllers/users.controller';
-import { User, UserSchema } from './infra/user.schema';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { User } from './infra/user.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: `mongodb:`
-          + `//${configService.get<string>("DATABASE_HOST")}`
-          + `:${configService.get<string>("DATABASE_PORT")}`
-          + `/${configService.get<string>("DATABASE_NAME")}`,
-      }),
-      inject: [ConfigService],
-    }),
+    TypeOrmModule.forFeature([User]),
+    ConfigModule,
   ],
   providers: [UsersService],
   controllers: [UsersController],
-  exports: [UsersService, MongooseModule],
+  exports: [UsersService],
 })
 export class UsersModule { }

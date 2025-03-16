@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app/app.controller';
 import { AppService } from './domain/app.service';
-import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -12,13 +12,13 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
       envFilePath: ['.env', `.env.${process.env.NODE_ENV}`],
     }),
-    MongooseModule.forRootAsync({
+    TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: `mongodb:`
-          + `//${configService.get<string>("DATABASE_HOST")}`
-          + `:${configService.get<string>("DATABASE_PORT")}`
-          + `/${configService.get<string>("DATABASE_NAME")}`,
+        type: 'sqlite',
+        database: 'db.sqlite',
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: true, // Set to false in production
       }),
       inject: [ConfigService],
     }),
